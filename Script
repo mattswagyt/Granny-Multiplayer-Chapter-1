@@ -1,0 +1,386 @@
+-- Roblox Lua Script for "Granny Multiplayer - Chapter 1" Map (By BMF)
+-- Script handles a draggable UI with multiple functionalities
+
+-- Variables
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local StarterGui = game:GetService("StarterGui")
+local UIS = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create UI Elements
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local LocationLabel = Instance.new("TextLabel")
+local ErrorLog = Instance.new("TextLabel")
+local UIListLayout = Instance.new("UIListLayout")
+
+-- UI Properties
+ScreenGui.Parent = PlayerGui
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Name = "GrannyUI"
+
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Size = UDim2.new(0, 300, 0, 400)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Visible = true
+
+Title.Parent = MainFrame
+Title.Text = "Granny Multiplayer - Chapter 1 (By BMF)"
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 18
+
+ErrorLog.Parent = MainFrame
+ErrorLog.Text = "Error Log: None"
+ErrorLog.Size = UDim2.new(1, 0, 0, 30)
+ErrorLog.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+ErrorLog.TextColor3 = Color3.fromRGB(255, 85, 85)
+ErrorLog.Font = Enum.Font.SourceSans
+ErrorLog.TextSize = 14
+ErrorLog.TextWrapped = true
+ErrorLog.TextYAlignment = Enum.TextYAlignment.Top
+
+UIListLayout.Parent = MainFrame
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- Toggle UI with Delete key
+UIS.InputBegan:Connect(function(input, processed)
+    if not processed and input.KeyCode == Enum.KeyCode.Delete then
+        MainFrame.Visible = not MainFrame.Visible
+    end
+end)
+
+-- Function to Create Buttons
+local function createButton(name, callback)
+    local Button = Instance.new("TextButton")
+    Button.Parent = MainFrame
+    Button.Text = name
+    Button.Size = UDim2.new(1, 0, 0, 30)
+    Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.Font = Enum.Font.SourceSans
+    Button.TextSize = 16
+    Button.MouseButton1Click:Connect(function()
+        pcall(callback)
+    end)
+    return Button
+end
+
+createButton("Infinite Yield", function()
+    local success, result = pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+    end)
+    if success then
+        print("Infinite Yield executed!")
+    else
+        print("Error executing Infinite Yield")
+    end
+end)
+
+createButton("Dex Explorer", function()
+    local success, result = pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
+    end)
+    if success then
+        print("Dex Explorer executed!")
+    else
+        print("Error executing Dex Explorer")
+    end
+end)
+
+-- ✅ Notification when script loads
+StarterGui:SetCore("SendNotification", {
+    Title = "Granny Script Loaded!";
+    Text = "All features are ready.";
+    Duration = 10;
+})
+
+-- ✅ ESP helper
+local function highlightTarget(target, color)
+    local highlight = Instance.new("Highlight")
+    highlight.Adornee = target
+    highlight.FillColor = color
+    highlight.OutlineColor = Color3.fromRGB(255,255,255)
+    highlight.FillTransparency = 0.5
+    highlight.OutlineTransparency = 0
+    highlight.Parent = target
+end
+
+-- ✅ Add Buttons Below
+
+createButton("Granny ESP", function()
+    local granny = nil
+
+    for i = 1, 5 do
+        local preset = workspace:FindFirstChild("Preset" .. i)
+        if preset and preset:FindFirstChild("Locks") and preset.Locks:FindFirstChild("Granny") then
+            granny = preset.Locks.Granny
+            break
+        end
+    end
+
+    if granny and granny:IsA("Model") then
+        local existingHighlight = granny:FindFirstChildOfClass("Highlight")
+        if not existingHighlight then
+            local highlight = Instance.new("Highlight")
+            highlight.Name = "GrannyESP"
+            highlight.Parent = granny
+            highlight.Adornee = granny
+            highlight.FillTransparency = 1
+            highlight.OutlineTransparency = 0
+            highlight.OutlineColor = Color3.fromRGB(255, 0, 0) -- Red
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop -- X-ray
+        end
+    else
+        ErrorLog.Text = "Error Log: Granny not found in Preset1 to Preset5"
+    end
+end)
+
+createButton("Slendrina Mother ESP", function()
+    local mother = nil
+
+    for i = 1, 5 do
+        local preset = workspace:FindFirstChild("Preset" .. i)
+        if preset and preset:FindFirstChild("Locks") and preset.Locks:FindFirstChild("SlendrinaMother") then
+            mother = preset.Locks.SlendrinaMother
+            break
+        end
+    end
+
+    if mother and mother:IsA("Model") then
+        local existingHighlight = mother:FindFirstChildOfClass("Highlight")
+        if not existingHighlight then
+            local highlight = Instance.new("Highlight")
+            highlight.Name = "SlendrinaESP"
+            highlight.Parent = mother
+            highlight.Adornee = mother
+            highlight.FillTransparency = 1
+            highlight.OutlineTransparency = 0
+            highlight.OutlineColor = Color3.fromRGB(255, 105, 180) -- Pink
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop -- X-ray
+        end
+    else
+        ErrorLog.Text = "Error Log: Slendrina's Mother not found in Preset1 to Preset5"
+    end
+end)
+
+createButton("Item ESP", function()
+    local itemNames = {
+        "A part of a shotgun (1)", "A part of a shotgun (2)", "A part of a shotgun (3)",
+        "Battery", "Bird seed", "Book", "Car battery", "Car key", "Chain cutter",
+        "Cogwheel (Orange)", "Cogwheel (Red)", "Cutting pliers", "Engine part",
+        "Gasoline can", "Master key", "Meat", "Playhouse key", "Remote control",
+        "Rusty padlock key", "Safekey", "Spark plug", "Special key", "Weapon key",
+        "Wheel crank", "Winch handle", "Wrench", "Padlock code", "Wooden stick"
+    }
+
+    for i = 1, 5 do
+        local preset = workspace:FindFirstChild("Preset" .. i)
+        if preset then
+            for _, name in ipairs(itemNames) do
+                local item = preset:FindFirstChild(name)
+                if item then
+                    -- Check for and apply Highlight
+                    if not item:FindFirstChildOfClass("Highlight") then
+                        local highlight = Instance.new("Highlight")
+                        highlight.Name = "ItemESP"
+                        highlight.Adornee = item
+                        highlight.Parent = item
+                        highlight.FillTransparency = 1 -- Outline only
+                        highlight.OutlineTransparency = 0
+                        highlight.OutlineColor = Color3.fromRGB(0, 255, 0) -- Green
+                        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop -- X-ray
+                    end
+
+                    -- Check for and apply BillboardGui for name text
+                    if not item:FindFirstChild("ItemLabel") then
+                        local billboard = Instance.new("BillboardGui")
+                        billboard.Name = "ItemLabel"
+                        billboard.Size = UDim2.new(0, 200, 0, 50)
+                        billboard.AlwaysOnTop = true
+                        billboard.StudsOffset = Vector3.new(0, 2, 0)
+                        billboard.Adornee = item
+                        billboard.Parent = item
+
+                        local label = Instance.new("TextLabel")
+                        label.Size = UDim2.new(1, 0, 1, 0)
+                        label.BackgroundTransparency = 1
+                        label.TextColor3 = Color3.fromRGB(255, 255, 255)
+                        label.TextStrokeTransparency = 0
+                        label.Text = name
+                        label.TextScaled = true
+                        label.Font = Enum.Font.GothamBold
+                        label.Parent = billboard
+                    end
+                end
+            end
+        end
+    end
+end)
+
+createButton("Get All Items", function()
+    for i = 1, 10 do
+        local preset = workspace:FindFirstChild("Preset" .. i)
+
+        if preset then
+            for _, item in pairs(preset:GetChildren()) do
+                if item:FindFirstChild("InteractRemote") then
+                    item.InteractRemote:FireServer(game.Players.LocalPlayer)
+                    wait(0.1) -- small delay to prevent lag/crash
+                    print("Got item:", item.Name)
+                end
+            end
+        end
+    end
+end)
+
+createButton("Granny Ignores You", function()
+    local grannyFolder = nil
+
+    for i = 1, 5 do
+        local preset = workspace:FindFirstChild("Preset" .. i)
+        if preset and preset:FindFirstChild("Locks") and preset.Locks:FindFirstChild("Granny") then
+            grannyFolder = preset.Locks.Granny
+            break
+        end
+    end
+
+    if grannyFolder then
+        local toDestroy = {
+            "CameraJumpscare1",
+            "CameraJumpscare2",
+            "Jumpscare"
+        }
+
+        for _, name in ipairs(toDestroy) do
+            local obj = grannyFolder:FindFirstChild(name)
+            if obj then
+                obj:Destroy()
+            end
+        end
+    else
+        ErrorLog.Text = "Error Log: Granny paths not found in Preset1 to Preset5."
+    end
+end)
+
+createButton("Slendrina's Mother Ignores You", function()
+    local motherFolder = nil
+
+    for i = 1, 5 do
+        local preset = workspace:FindFirstChild("Preset" .. i)
+        if preset and preset:FindFirstChild("Locks") and preset.Locks:FindFirstChild("SlendrinaMother") then
+            motherFolder = preset.Locks.SlendrinaMother
+            break
+        end
+    end
+
+    if motherFolder then
+        local toDestroy = {
+            "CameraJumpscare",
+            "CameraJumpscare2",
+            "Jumpscare"
+        }
+
+        for _, name in ipairs(toDestroy) do
+            local obj = motherFolder:FindFirstChild(name)
+            if obj then
+                obj:Destroy()
+            end
+        end
+    else
+        ErrorLog.Text = "Error Log: SlendrinaMother paths not found in Preset1 to Preset5."
+    end
+end)
+
+createButton("Spider Ignores You", function()
+    for i = 1, 10 do
+        local preset = workspace:FindFirstChild("Preset" .. i)
+        if preset and preset:FindFirstChild("Locks") then
+            local locks = preset.Locks:GetChildren()
+            for _, lock in pairs(locks) do
+                local spider = lock:FindFirstChild("Spider")
+                if spider then
+                    -- Remove Damage and TouchInterest from Head
+                    local head = spider:FindFirstChild("Head")
+                    if head then
+                        local damage = head:FindFirstChild("Damage")
+                        if damage then damage:Destroy() end
+
+                        local touchInterest = head:FindFirstChildWhichIsA("TouchTransmitter", true)
+                        if touchInterest then touchInterest:Destroy() end
+                    end
+
+                    -- Remove ChaseScript
+                    local chaseScript = spider:FindFirstChild("ChaseScript")
+                    if chaseScript then chaseScript:Destroy() end
+                end
+
+                -- Remove CatchPlayer from the lock itself
+                local catchPlayer = lock:FindFirstChild("CatchPlayer")
+                if catchPlayer then catchPlayer:Destroy() end
+            end
+        end
+    end
+
+    print("All spiders should now ignore you across Presets 1 to 10.")
+end)
+
+createButton("God Mode", function()
+    local player = game:GetService("Players").LocalPlayer
+    local char = player.Character or workspace:FindFirstChild(player.Name)
+
+    if char then
+        -- Optional God mode visual tweaks
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+                part.Anchored = false
+                part.Transparency = 0.5
+            end
+        end
+
+        -- Change Humanoid name to avoid detection (if it exists)
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.Name = "NotHumanoid"
+        end
+
+        -- Unanchor root part if found
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if root then
+            root.Anchored = false
+        end
+
+        -- Destroy target paths dynamically
+        local function safeDestroy(path)
+            if path then
+                path:Destroy()
+            end
+        end
+
+        safeDestroy(workspace:FindFirstChild(player.Name):FindFirstChild("Health"))
+        safeDestroy(workspace:FindFirstChild(player.Name):FindFirstChild("HumanoidRootPart"):FindFirstChild("FreeFalling"))
+        safeDestroy(workspace:FindFirstChild(player.Name):FindFirstChild("Animate"):FindFirstChild("fall"))
+        safeDestroy(player:FindFirstChild("PlayerGui"):FindFirstChild("MainGUI"):FindFirstChild("FallSystem"))
+    end
+end)
+
+createButton("Full Bright", function()
+    Lighting.Ambient = Color3.new(1, 1, 1)
+    Lighting.Brightness = 3
+    Lighting.FogEnd = 100000
+    Lighting.ClockTime = 14
+end)
+
+createButton("Unlock Camera", function()
+    LocalPlayer.CameraMaxZoomDistance = 1000
+    LocalPlayer.CameraMinZoomDistance = 0.5
+end)
