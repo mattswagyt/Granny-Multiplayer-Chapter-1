@@ -1,0 +1,8 @@
+10/15/25:
+
+- Added the following new features: Remove Rats & Remove Fall Animations
+- Updated Get All Items to give you the general items such as crossbow, pepper spray, and freeze trap.
+- Fixed a bug with Granny Ignores You where she'll kill you after killing another player. (You can always just press the button again, after she kills a player to prevent this)
+- Fixed Granny Ignores You & Slendrina's Mother Ignores You not printing the success message in console (F9) after pressing the buttons.
+- Added colored tracers and name tags to Granny ESP & Slendrina's Mother ESP!
+- More features coming soon, for now I will be working on making scripts for Chapter 2 & Chapter 3.
