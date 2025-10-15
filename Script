@@ -301,90 +301,77 @@ createButton("Get All Items", function()
     local backpack = player:FindFirstChild("Backpack")
     local character = player.Character or player.CharacterAdded:Wait()
 
-    -- ✅ Helper: checks if you already have an item
+    -- ✅ Helper: check if player already has tool
     local function hasTool(toolName)
-        if backpack:FindFirstChild(toolName) or character:FindFirstChild(toolName) then
-            return true
-        end
-        return false
+        return backpack:FindFirstChild(toolName) or character:FindFirstChild(toolName)
     end
 
-    -- ✅ Helper: clone and give item
-    local function giveTool(item)
-        if item and item:IsA("Tool") then
+    -- ✅ Helper: try to fire or clone item
+    local function obtainItem(item)
+        if not item then return end
+        if item:FindFirstChild("InteractRemote") then
+            item.InteractRemote:FireServer(player)
+            print("Picked up via InteractRemote:", item.Name)
+        elseif item:IsA("Tool") then
             local clone = item:Clone()
             clone.Parent = backpack
-            print("Added missing tool:", item.Name)
+            print("Manually cloned tool:", item.Name)
+        else
+            print("⚠️ Unable to pick up item:", item.Name)
         end
+        task.wait(0.1)
     end
 
     -- ✅ Step 1: Grab interactable items from all Presets
     for i = 1, 10 do
         local preset = workspace:FindFirstChild("Preset" .. i)
-
         if preset then
             for _, item in pairs(preset:GetChildren()) do
                 if item:FindFirstChild("InteractRemote") then
-                    item.InteractRemote:FireServer(player)
-                    wait(0.1)
-                    print("Got item:", item.Name)
+                    obtainItem(item)
                 end
             end
         end
     end
 
-    -- ✅ Step 2: Ensure you have these tools in inventory
-    local importantTools = {"Winch handle", "Melon", "Hammer", "Padlock key"}
-    for _, toolName in ipairs(importantTools) do
-        if not hasTool(toolName) then
+    -- ✅ Step 2: Ensure key items are collected
+    local keyItems = {"Winch handle", "Melon", "Hammer", "Padlock key"}
+    for _, itemName in ipairs(keyItems) do
+        if not hasTool(itemName) then
             for i = 1, 10 do
                 local preset = workspace:FindFirstChild("Preset" .. i)
-                if preset and preset:FindFirstChild(toolName) then
-                    giveTool(preset[toolName])
+                if preset and preset:FindFirstChild(itemName) then
+                    obtainItem(preset[itemName])
                     break
                 end
             end
         end
     end
 
-    -- ✅ Step 3: Get the Spider Key from Presets (under Locks)
+    -- ✅ Step 3: Get Spider Key from Locks
     for i = 1, 10 do
         local preset = workspace:FindFirstChild("Preset" .. i)
         if preset and preset:FindFirstChild("Locks") and preset.Locks:FindFirstChild("Spiderkey") then
             local spiderKey = preset.Locks.Spiderkey
-            if spiderKey:FindFirstChild("InteractRemote") then
-                spiderKey.InteractRemote:FireServer(player)
-                print("Got Spider Key from Preset" .. i)
-            elseif not hasTool("Spider Key") then
-                giveTool(spiderKey)
+            if not hasTool("Spider Key") then
+                obtainItem(spiderKey)
             end
             break
         end
     end
 
-    -- ✅ Step 4: Get special General Items (Crossbow, FreezeTrap, Pepper Spray)
+    -- ✅ Step 4: Get General Items
     local generalItems = workspace:FindFirstChild("General Items")
     if generalItems then
-        local specialItems = {
-            "Crossbow",
-            "FreezeTrap",
-            "Pepper spray"
-        }
-
+        local specialItems = {"Crossbow", "FreezeTrap", "Pepper spray"}
         for _, name in ipairs(specialItems) do
             local item = generalItems:FindFirstChild(name)
             if item then
-                if item:FindFirstChild("InteractRemote") then
-                    item.InteractRemote:FireServer(player)
-                elseif not hasTool(name) then
-                    giveTool(item)
-                end
-                print("Got General Item:", name)
-                wait(0.1)
+                obtainItem(item)
             end
         end
     else
-        warn("General Items folder not found!")
+        warn("⚠️ General Items folder not found.")
     end
 
     print("✅ All obtainable items have been collected or added!")
@@ -513,6 +500,32 @@ createButton("Remove Rats", function()
     else
         warn("Error: SpectralRats not found under workspace.GeneralThemeItems")
     end
+end)
+
+createButton("Remove Fall Animations", function()
+    local paths = {
+        workspace:FindFirstChild("GiveGUI")
+            and workspace.GiveGUI:FindFirstChild("ShowGUI")
+            and workspace.GiveGUI.ShowGUI:FindFirstChild("MainGUI")
+            and workspace.GiveGUI.ShowGUI.MainGUI:FindFirstChild("FallSystem"),
+
+        game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
+            and game.Players.LocalPlayer.PlayerGui:FindFirstChild("MainGUI")
+            and game.Players.LocalPlayer.PlayerGui.MainGUI:FindFirstChild("FallSystem")
+    }
+
+    for _, obj in pairs(paths) do
+        if obj then
+            obj:Destroy()
+        end
+    end
+
+    print("Fall animations successfully removed!")
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Removed Fall Animations!",
+        Text = "Removes the falling animation system for smoother movement.",
+        Duration = 5
+    })
 end)
 
 createButton("God Mode", function()
