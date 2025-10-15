@@ -297,28 +297,108 @@ createButton("Item ESP", function()
 end)
 
 createButton("Get All Items", function()
+    local player = game.Players.LocalPlayer
+    local backpack = player:FindFirstChild("Backpack")
+    local character = player.Character or player.CharacterAdded:Wait()
+
+    -- ✅ Helper: checks if you already have an item
+    local function hasTool(toolName)
+        if backpack:FindFirstChild(toolName) or character:FindFirstChild(toolName) then
+            return true
+        end
+        return false
+    end
+
+    -- ✅ Helper: clone and give item
+    local function giveTool(item)
+        if item and item:IsA("Tool") then
+            local clone = item:Clone()
+            clone.Parent = backpack
+            print("Added missing tool:", item.Name)
+        end
+    end
+
+    -- ✅ Step 1: Grab interactable items from all Presets
     for i = 1, 10 do
         local preset = workspace:FindFirstChild("Preset" .. i)
 
         if preset then
             for _, item in pairs(preset:GetChildren()) do
                 if item:FindFirstChild("InteractRemote") then
-                    item.InteractRemote:FireServer(game.Players.LocalPlayer)
-                    wait(0.1) -- small delay to prevent lag/crash
+                    item.InteractRemote:FireServer(player)
+                    wait(0.1)
                     print("Got item:", item.Name)
                 end
             end
         end
     end
+
+    -- ✅ Step 2: Ensure you have these tools in inventory
+    local importantTools = {"Winch handle", "Melon", "Hammer", "Padlock key"}
+    for _, toolName in ipairs(importantTools) do
+        if not hasTool(toolName) then
+            for i = 1, 10 do
+                local preset = workspace:FindFirstChild("Preset" .. i)
+                if preset and preset:FindFirstChild(toolName) then
+                    giveTool(preset[toolName])
+                    break
+                end
+            end
+        end
+    end
+
+    -- ✅ Step 3: Get the Spider Key from Presets (under Locks)
+    for i = 1, 10 do
+        local preset = workspace:FindFirstChild("Preset" .. i)
+        if preset and preset:FindFirstChild("Locks") and preset.Locks:FindFirstChild("Spiderkey") then
+            local spiderKey = preset.Locks.Spiderkey
+            if spiderKey:FindFirstChild("InteractRemote") then
+                spiderKey.InteractRemote:FireServer(player)
+                print("Got Spider Key from Preset" .. i)
+            elseif not hasTool("Spider Key") then
+                giveTool(spiderKey)
+            end
+            break
+        end
+    end
+
+    -- ✅ Step 4: Get special General Items (Crossbow, FreezeTrap, Pepper Spray)
+    local generalItems = workspace:FindFirstChild("General Items")
+    if generalItems then
+        local specialItems = {
+            "Crossbow",
+            "FreezeTrap",
+            "Pepper spray"
+        }
+
+        for _, name in ipairs(specialItems) do
+            local item = generalItems:FindFirstChild(name)
+            if item then
+                if item:FindFirstChild("InteractRemote") then
+                    item.InteractRemote:FireServer(player)
+                elseif not hasTool(name) then
+                    giveTool(item)
+                end
+                print("Got General Item:", name)
+                wait(0.1)
+            end
+        end
+    else
+        warn("General Items folder not found!")
+    end
+
+    print("✅ All obtainable items have been collected or added!")
 end)
 
 createButton("Granny Ignores You", function()
     local grannyFolder = nil
+    local foundPresetIndex = nil  -- ✅ store which preset Granny was found in
 
     for i = 1, 5 do
         local preset = workspace:FindFirstChild("Preset" .. i)
         if preset and preset:FindFirstChild("Locks") and preset.Locks:FindFirstChild("Granny") then
             grannyFolder = preset.Locks.Granny
+            foundPresetIndex = i
             break
         end
     end
@@ -337,13 +417,15 @@ createButton("Granny Ignores You", function()
             end
         end
 
-        -- Also destroy Granny's Attack path in Preset1
-        local attackPath = workspace:FindFirstChild("Preset" .. i)
-        if attackPath and attackPath:FindFirstChild("Locks") and attackPath.Locks:FindFirstChild("Granny") and attackPath.Locks.Granny:FindFirstChild("Attack") then
-            attackPath.Locks.Granny.Attack:Destroy()
+        -- ✅ Use foundPresetIndex safely here
+        if foundPresetIndex then
+            local attackPath = workspace:FindFirstChild("Preset" .. foundPresetIndex)
+            if attackPath and attackPath:FindFirstChild("Locks") and attackPath.Locks:FindFirstChild("Granny") and attackPath.Locks.Granny:FindFirstChild("Attack") then
+                attackPath.Locks.Granny.Attack:Destroy()
+            end
         end
 
-        print("Granny will now ignore you!")
+        print("Granny will now ignore you!") -- ✅ will print correctly now
     else
         ErrorLog.Text = "Error Log: Granny paths not found in Preset1 to Preset5."
     end
@@ -412,6 +494,25 @@ createButton("Spider Ignores You", function()
     end
 
     print("All spiders should now ignore you across Presets 1 to 10.")
+end)
+
+createButton("Remove Rats", function()
+    local ratsPath = workspace:FindFirstChild("GeneralThemeItems")
+
+    if ratsPath and ratsPath:FindFirstChild("SpectralRats") then
+        ratsPath.SpectralRats:Destroy()
+
+        print("Rats have successfully been removed!")
+
+        -- ✅ Create notification
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "🐀 Rats Removed",
+            Text = "Removes the annoying rats that get in your way during gameplay.",
+            Duration = 5
+        })
+    else
+        warn("Error: SpectralRats not found under workspace.GeneralThemeItems")
+    end
 end)
 
 createButton("God Mode", function()
