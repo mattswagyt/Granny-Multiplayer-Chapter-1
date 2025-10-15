@@ -108,11 +108,63 @@ local function highlightTarget(target, color)
     local highlight = Instance.new("Highlight")
     highlight.Adornee = target
     highlight.FillColor = color
-    highlight.OutlineColor = Color3.fromRGB(255,255,255)
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
     highlight.FillTransparency = 0.5
     highlight.OutlineTransparency = 0
     highlight.Parent = target
 end
+
+-- ✅ Tracer helper
+local function createTracer(target, color)
+    local RunService = game:GetService("RunService")
+    local camera = workspace.CurrentCamera
+    local line = Drawing.new("Line")
+    line.Visible = true
+    line.Color = color
+    line.Thickness = 2
+
+    -- Update tracer position every frame
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        if target and target:FindFirstChild("HumanoidRootPart") and target:FindFirstChildOfClass("Humanoid") then
+            local hrp = target:FindFirstChild("HumanoidRootPart")
+            local pos, onScreen = camera:WorldToViewportPoint(hrp.Position)
+            if onScreen then
+                line.From = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y) -- from bottom center of screen
+                line.To = Vector2.new(pos.X, pos.Y)
+                line.Visible = true
+            else
+                line.Visible = false
+            end
+        else
+            line.Visible = false
+            connection:Disconnect()
+            line:Remove()
+        end
+    end)
+end
+
+-- ✅ Floating Name helper
+local function createNameTag(target, text, color)
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "NameTag"
+    billboard.Size = UDim2.new(0, 200, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.MaxDistance = 500
+    billboard.Parent = target
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = color
+    label.TextStrokeTransparency = 0
+    label.TextScaled = true
+    label.Font = Enum.Font.SourceSansBold
+    label.Parent = billboard
+end
+
 
 -- ✅ Add Buttons Below
 
@@ -128,8 +180,8 @@ createButton("Granny ESP", function()
     end
 
     if granny and granny:IsA("Model") then
-        local existingHighlight = granny:FindFirstChildOfClass("Highlight")
-        if not existingHighlight then
+        -- Highlight
+        if not granny:FindFirstChildOfClass("Highlight") then
             local highlight = Instance.new("Highlight")
             highlight.Name = "GrannyESP"
             highlight.Parent = granny
@@ -137,12 +189,22 @@ createButton("Granny ESP", function()
             highlight.FillTransparency = 1
             highlight.OutlineTransparency = 0
             highlight.OutlineColor = Color3.fromRGB(255, 0, 0) -- Red
-            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop -- X-ray
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        end
+
+        -- Tracer
+        createTracer(granny, Color3.fromRGB(255, 0, 0))
+
+        -- Name Tag
+        if not granny:FindFirstChild("NameTag") then
+            createNameTag(granny, "Granny", Color3.fromRGB(255, 0, 0))
         end
     else
         ErrorLog.Text = "Error Log: Granny not found in Preset1 to Preset5"
     end
 end)
+
+
 
 createButton("Slendrina Mother ESP", function()
     local mother = nil
@@ -156,8 +218,8 @@ createButton("Slendrina Mother ESP", function()
     end
 
     if mother and mother:IsA("Model") then
-        local existingHighlight = mother:FindFirstChildOfClass("Highlight")
-        if not existingHighlight then
+        -- Highlight
+        if not mother:FindFirstChildOfClass("Highlight") then
             local highlight = Instance.new("Highlight")
             highlight.Name = "SlendrinaESP"
             highlight.Parent = mother
@@ -165,7 +227,15 @@ createButton("Slendrina Mother ESP", function()
             highlight.FillTransparency = 1
             highlight.OutlineTransparency = 0
             highlight.OutlineColor = Color3.fromRGB(255, 105, 180) -- Pink
-            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop -- X-ray
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        end
+
+        -- Tracer
+        createTracer(mother, Color3.fromRGB(255, 105, 180))
+
+        -- Name Tag
+        if not mother:FindFirstChild("NameTag") then
+            createNameTag(mother, "Slendrina's Mother", Color3.fromRGB(255, 105, 180))
         end
     else
         ErrorLog.Text = "Error Log: Slendrina's Mother not found in Preset1 to Preset5"
@@ -266,10 +336,19 @@ createButton("Granny Ignores You", function()
                 obj:Destroy()
             end
         end
+
+        -- Also destroy Granny's Attack path in Preset1
+        local attackPath = workspace:FindFirstChild("Preset" .. i)
+        if attackPath and attackPath:FindFirstChild("Locks") and attackPath.Locks:FindFirstChild("Granny") and attackPath.Locks.Granny:FindFirstChild("Attack") then
+            attackPath.Locks.Granny.Attack:Destroy()
+        end
+
+        print("Granny will now ignore you!")
     else
         ErrorLog.Text = "Error Log: Granny paths not found in Preset1 to Preset5."
     end
 end)
+
 
 createButton("Slendrina's Mother Ignores You", function()
     local motherFolder = nil
@@ -295,6 +374,8 @@ createButton("Slendrina's Mother Ignores You", function()
                 obj:Destroy()
             end
         end
+
+        print("Slendrina's Mother will now ignore you!")
     else
         ErrorLog.Text = "Error Log: SlendrinaMother paths not found in Preset1 to Preset5."
     end
