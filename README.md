@@ -16,6 +16,8 @@ Here are the features!
 - Slendrina's Mother ESP
 - Item ESP
 - Collect all Items
+- Remove Rats
+- Remove Fall Animations
 - More soon!
 
 Enjoy!
