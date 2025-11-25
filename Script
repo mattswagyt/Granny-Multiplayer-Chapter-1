@@ -15,6 +15,7 @@ local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
 local LocationLabel = Instance.new("TextLabel")
 local ErrorLog = Instance.new("TextLabel")
+local CodeLabel = Instance.new("TextLabel") -- ✅ NEW LABEL
 local UIListLayout = Instance.new("UIListLayout")
 
 -- UI Properties
@@ -47,6 +48,43 @@ ErrorLog.Font = Enum.Font.SourceSans
 ErrorLog.TextSize = 14
 ErrorLog.TextWrapped = true
 ErrorLog.TextYAlignment = Enum.TextYAlignment.Top
+
+-- ✅ NEW CODE LABEL BELOW ERROR LOG
+CodeLabel.Parent = MainFrame
+CodeLabel.Text = "Code: Searching..."
+CodeLabel.Size = UDim2.new(1, 0, 0, 25)
+CodeLabel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+CodeLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+CodeLabel.Font = Enum.Font.SourceSans
+CodeLabel.TextSize = 14
+CodeLabel.TextWrapped = false
+CodeLabel.TextYAlignment = Enum.TextYAlignment.Center
+
+-- Code value reader loop (preset1–preset10)
+task.spawn(function()
+    while true do
+        local foundCode = false
+
+        for i = 1, 10 do
+            local preset = workspace:FindFirstChild("Preset" .. i)
+            if preset and preset:FindFirstChild("Locks") then
+                local codeVal = preset.Locks:FindFirstChild("CodeValue")
+
+                if codeVal then
+                    CodeLabel.Text = "Code: " .. tostring(codeVal.Value)
+                    foundCode = true
+                    break
+                end
+            end
+        end
+
+        if not foundCode then
+            CodeLabel.Text = "Code: Not Found"
+        end
+
+        task.wait(0.2)
+    end
+end)
 
 UIListLayout.Parent = MainFrame
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -483,22 +521,32 @@ createButton("Spider Ignores You", function()
     print("All spiders should now ignore you across Presets 1 to 10.")
 end)
 
-createButton("Remove Rats", function()
-    local ratsPath = workspace:FindFirstChild("GeneralThemeItems")
+createButton("Infinite Ammo", function()
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+    local ammo = LocalPlayer.Backpack:FindFirstChild("CrossbowAmmo")
 
-    if ratsPath and ratsPath:FindFirstChild("SpectralRats") then
-        ratsPath.SpectralRats:Destroy()
+    if ammo then
+        -- Keep ammo at 1 forever
+        task.spawn(function()
+            while true do
+                if ammo and ammo.Value ~= 1 then
+                    ammo.Value = 1
+                end
+                task.wait(0.1)
+            end
+        end)
 
-        print("Rats have successfully been removed!")
+        print("Infinite Ammo enabled!")
 
-        -- ✅ Create notification
+        -- Notification
         game.StarterGui:SetCore("SendNotification", {
-            Title = "🐀 Rats Removed",
-            Text = "Removes the annoying rats that get in your way during gameplay.",
+            Title = "🔫 Infinite Ammo Enabled",
+            Text = "Your crossbow ammo will stay at 1 forever.",
             Duration = 5
         })
     else
-        warn("Error: SpectralRats not found under workspace.GeneralThemeItems")
+        warn("Error: CrossbowAmmo not found in LocalPlayer.Backpack")
     end
 end)
 
