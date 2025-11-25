@@ -524,14 +524,18 @@ end)
 createButton("Infinite Ammo", function()
     local Players = game:GetService("Players")
     local LocalPlayer = Players.LocalPlayer
-    local ammo = LocalPlayer.Backpack:FindFirstChild("CrossbowAmmo")
+    local ammo1 = LocalPlayer.Backpack:FindFirstChild("CrossbowAmmo")
+    local ammo2 = LocalPlayer.Backpack:FindFirstChild("ShotgunAmmo")
 
-    if ammo then
+    if ammo1 or ammo2 then
         -- Keep ammo at 1 forever
         task.spawn(function()
             while true do
-                if ammo and ammo.Value ~= 1 then
-                    ammo.Value = 1
+                if ammo1 and ammo1.Value ~= 1 then
+                    ammo1.Value = 1
+                end
+                if ammo2 and ammo2.Value ~= 1 then
+                    ammo2.Value = 1
                 end
                 task.wait(0.1)
             end
@@ -539,14 +543,14 @@ createButton("Infinite Ammo", function()
 
         print("Infinite Ammo enabled!")
 
-        -- Notification
+        -- Updated Notification
         game.StarterGui:SetCore("SendNotification", {
             Title = "🔫 Infinite Ammo Enabled",
-            Text = "Your crossbow ammo will stay at 1 forever.",
+            Text = "Your crossbow & shotgun ammo will both stay at 1 forever.",
             Duration = 5
         })
     else
-        warn("Error: CrossbowAmmo not found in LocalPlayer.Backpack")
+        warn("Error: CrossbowAmmo or ShotgunAmmo not found in LocalPlayer.Backpack")
     end
 end)
 
@@ -613,6 +617,42 @@ createButton("God Mode", function()
         safeDestroy(workspace:FindFirstChild(player.Name):FindFirstChild("HumanoidRootPart"):FindFirstChild("FreeFalling"))
         safeDestroy(workspace:FindFirstChild(player.Name):FindFirstChild("Animate"):FindFirstChild("fall"))
         safeDestroy(player:FindFirstChild("PlayerGui"):FindFirstChild("MainGUI"):FindFirstChild("FallSystem"))
+    end
+end)
+
+createButton("Gain Sewer Access", function()
+    local success = false
+
+    for i = 1, 10 do
+        local preset = workspace:FindFirstChild("Preset" .. i)
+        if preset and preset:FindFirstChild("Locks") then
+            local locks = preset.Locks
+            local children = locks:GetChildren()
+
+            if children[43] then
+                children[43]:Destroy()
+                success = true
+                print("Sewer Access unlocked!")
+                break
+            end
+        end
+    end
+
+    if not success then
+        warn("Error: Sewer Access object not found in any preset 1–10.")
+        ErrorLog.Text = "Error Log: Sewer Access object not found."
+    end
+end)
+
+createButton("Remove Backyard Door", function()
+    local door = workspace:FindFirstChild("KeyCard Door")
+
+    if door then
+        door:Destroy()
+        print("Backyard Door removed!")
+    else
+        warn("Error: KeyCard Door not found in workspace.")
+        ErrorLog.Text = "Error Log: KeyCard Door not found."
     end
 end)
 
