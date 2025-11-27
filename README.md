@@ -9,6 +9,7 @@ Here are the features!
 - Full Bright
 - Unlock Camera
 - God Mode
+- Remove Fall Animations
 - Granny Ignores You
 - Slendrina's Mother Ignores You
 - Spider Ignores You
@@ -16,9 +17,15 @@ Here are the features!
 - Slendrina's Mother ESP
 - Item ESP
 - Collect all Items
-- Remove Rats
-- Remove Fall Animations
-- More soon!
+- Remove Backyard Door
+- Gain Sewer Access (WIP)
+- Infinite Ammo
+- Unlock Secret Ending
+- No Beartraps
+- TP to Spawn
+- TP to Sewer
+- TP to Chests
+- Sewer Escape
 
 Enjoy!
 
