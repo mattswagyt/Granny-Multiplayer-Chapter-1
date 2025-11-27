@@ -620,6 +620,55 @@ createButton("God Mode", function()
     end
 end)
 
+createButton("Unlock Secret Ending", function()
+    local found = false
+
+    for i = 1, 10 do
+        local preset = workspace:FindFirstChild("Preset" .. i)
+        if preset and preset:FindFirstChild("Locks") then
+            local locks = preset.Locks
+            local isSecret = locks:FindFirstChild("IsSecretEnding")
+
+            if isSecret and isSecret:IsA("BoolValue") then
+                isSecret.Value = true
+                ErrorLog.Text = "Error Log: Secret Ending unlocked! (Preset" .. i .. ")"
+                found = true
+                break
+            end
+        end
+    end
+
+    if not found then
+        ErrorLog.Text = "Error Log: IsSecretEnding not found in any preset"
+    end
+end)
+
+createButton("No Beartraps", function()
+    local found = false
+
+    for i = 1, 10 do
+        local preset = workspace:FindFirstChild("Preset" .. i)
+        if preset and preset:FindFirstChild("Locks") then
+            local locks = preset.Locks
+            if locks:FindFirstChild("Granny") then
+                local granny = locks.Granny
+                local beartrap = granny:FindFirstChild("BeartrapSpawn")
+
+                if beartrap then
+                    beartrap:Destroy()
+                    ErrorLog.Text = "Error Log: Beartraps removed! (Preset" .. i .. ")"
+                    found = true
+                    break
+                end
+            end
+        end
+    end
+
+    if not found then
+        ErrorLog.Text = "Error Log: BeartrapSpawn not found in any preset"
+    end
+end)
+
 createButton("Gain Sewer Access", function()
     local success = false
 
@@ -667,3 +716,20 @@ createButton("Unlock Camera", function()
     LocalPlayer.CameraMaxZoomDistance = 1000
     LocalPlayer.CameraMinZoomDistance = 0.5
 end)
+
+createButton("TP to Spawn", function()
+    LocalPlayer.Character:PivotTo(CFrame.new(-305, 4, 11))
+end)
+
+createButton("TP to Sewer", function()
+    LocalPlayer.Character:PivotTo(CFrame.new(-329, -18, 35))
+end)
+
+createButton("TP to Chests", function()
+    LocalPlayer.Character:PivotTo(CFrame.new(-335, -12, 22))
+end)
+
+createButton("Sewer Escape", function()
+    LocalPlayer.Character:PivotTo(CFrame.new(-340, -18, 34))
+end)
+
