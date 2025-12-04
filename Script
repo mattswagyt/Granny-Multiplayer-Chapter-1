@@ -203,12 +203,71 @@ local function createNameTag(target, text, color)
     label.Parent = billboard
 end
 
+createButton("Player ESP", function()
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+
+    local ESP_COLOR = Color3.fromRGB(0, 255, 0) -- Green
+
+    -- Function to ESP a single character model
+    local function applyPlayerESP(character, player)
+        if not character then return end
+        if character:FindFirstChild("HumanoidRootPart") == nil then return end
+
+        -- Prevent duplicate ESP
+        if character:FindFirstChild("PlayerESP_Highlight") then return end
+
+        -- Highlight
+        local highlight = Instance.new("Highlight")
+        highlight.Name = "PlayerESP_Highlight"
+        highlight.Adornee = character
+        highlight.FillColor = ESP_COLOR
+        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+        highlight.FillTransparency = 0.5
+        highlight.OutlineTransparency = 0
+        highlight.Parent = character
+
+        -- Tracer
+        createTracer(character, ESP_COLOR)
+
+        -- Name tag
+        createNameTag(character, player.Name, ESP_COLOR)
+    end
+
+    -- Apply ESP for all current players
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            if player.Character then
+                applyPlayerESP(player.Character, player)
+            end
+        end
+    end
+
+    -- When a new character spawns, apply ESP again
+    Players.PlayerAdded:Connect(function(player)
+        player.CharacterAdded:Connect(function(char)
+            task.wait(1)
+            applyPlayerESP(char, player)
+        end)
+    end)
+
+    -- Also detect respawns for already-joined players
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            player.CharacterAdded:Connect(function(char)
+                task.wait(1)
+                applyPlayerESP(char, player)
+            end)
+        end
+    end
+end)
 
 -- ✅ Add Buttons Below
 
 createButton("Granny ESP", function()
     local granny = nil
-
+    
+    -- Look for Granny in Preset1–Preset5
     for i = 1, 5 do
         local preset = workspace:FindFirstChild("Preset" .. i)
         if preset and preset:FindFirstChild("Locks") and preset.Locks:FindFirstChild("Granny") then
@@ -217,7 +276,15 @@ createButton("Granny ESP", function()
         end
     end
 
-    if granny and granny:IsA("Model") then
+    if not granny or not granny:IsA("Model") then
+        ErrorLog.Text = "Error Log: Granny not found in Preset1 to Preset5"
+        return
+    end
+
+    -----------------------------------------------------------------------
+    -- FUNCTION: applies ESP (Highlight + Tracer + NameTag)
+    -----------------------------------------------------------------------
+    local function applyESP()
         -- Highlight
         if not granny:FindFirstChildOfClass("Highlight") then
             local highlight = Instance.new("Highlight")
@@ -226,7 +293,7 @@ createButton("Granny ESP", function()
             highlight.Adornee = granny
             highlight.FillTransparency = 1
             highlight.OutlineTransparency = 0
-            highlight.OutlineColor = Color3.fromRGB(255, 0, 0) -- Red
+            highlight.OutlineColor = Color3.fromRGB(255, 0, 0)
             highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
         end
 
@@ -237,12 +304,64 @@ createButton("Granny ESP", function()
         if not granny:FindFirstChild("NameTag") then
             createNameTag(granny, "Granny", Color3.fromRGB(255, 0, 0))
         end
-    else
-        ErrorLog.Text = "Error Log: Granny not found in Preset1 to Preset5"
     end
+
+    -----------------------------------------------------------------------
+    -- FUNCTION: removes ESP entirely so it can be reapplied after respawn
+    -----------------------------------------------------------------------
+    local function removeESP()
+        local highlight = granny:FindFirstChild("GrannyESP")
+        if highlight then highlight:Destroy() end
+
+        local nameTag = granny:FindFirstChild("NameTag")
+        if nameTag then nameTag:Destroy() end
+
+        -- Remove tracers if your tracer system stores them inside Granny
+        for _, obj in pairs(granny:GetChildren()) do
+            if obj.Name == "Tracer" then
+                obj:Destroy()
+            end
+        end
+    end
+
+    -----------------------------------------------------------------------
+    -- Apply ESP initially
+    -----------------------------------------------------------------------
+    applyESP()
+
+    -----------------------------------------------------------------------
+    -- CONSTANT CHECK LOOP FOR RESPAWN EVENTS
+    -----------------------------------------------------------------------
+    task.spawn(function()
+        local respawnObj = workspace.Preset5.Locks.Granny:FindFirstChild("Respawn")
+        if not respawnObj then return end
+
+        local WasCrossbow = respawnObj:FindFirstChild("WasCrossbow")
+        local WasShotgun = respawnObj:FindFirstChild("WasShotgun")
+
+        if not WasCrossbow or not WasShotgun then return end
+
+        while true do
+            task.wait(0.2) -- Check 5 times per second
+
+            -- CROSSBOW: Granny gone for 1 minute
+            if WasCrossbow.Value == true then
+                removeESP()
+                task.wait(60) -- 1 minute
+                applyESP()
+                WasCrossbow.Value = false
+            end
+
+            -- SHOTGUN: Granny gone for 1 minute 30 seconds
+            if WasShotgun.Value == true then
+                removeESP()
+                task.wait(90) -- 1 min 30 sec
+                applyESP()
+                WasShotgun.Value = false
+            end
+        end
+    end)
 end)
-
-
 
 createButton("Slendrina Mother ESP", function()
     local mother = nil
@@ -719,6 +838,10 @@ end)
 
 createButton("TP to Spawn", function()
     LocalPlayer.Character:PivotTo(CFrame.new(-305, 4, 11))
+end)
+
+createButton("TP to Backyard", function()
+    LocalPlayer.Character:PivotTo(CFrame.new(-316, -4, 24))
 end)
 
 createButton("TP to Sewer", function()
