@@ -347,7 +347,7 @@ createButton("Granny ESP", function()
             -- CROSSBOW: Granny gone for 1 minute
             if WasCrossbow.Value == true then
                 removeESP()
-                task.wait(60) -- 1 minute
+                task.wait(65) -- 1 minute
                 applyESP()
                 WasCrossbow.Value = false
             end
@@ -355,7 +355,7 @@ createButton("Granny ESP", function()
             -- SHOTGUN: Granny gone for 1 minute 30 seconds
             if WasShotgun.Value == true then
                 removeESP()
-                task.wait(90) -- 1 min 30 sec
+                task.wait(95) -- 1 min 30 sec
                 applyESP()
                 WasShotgun.Value = false
             end
