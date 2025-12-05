@@ -788,30 +788,6 @@ createButton("No Beartraps", function()
     end
 end)
 
-createButton("Gain Sewer Access", function()
-    local success = false
-
-    for i = 1, 10 do
-        local preset = workspace:FindFirstChild("Preset" .. i)
-        if preset and preset:FindFirstChild("Locks") then
-            local locks = preset.Locks
-            local children = locks:GetChildren()
-
-            if children[43] then
-                children[43]:Destroy()
-                success = true
-                print("Sewer Access unlocked!")
-                break
-            end
-        end
-    end
-
-    if not success then
-        warn("Error: Sewer Access object not found in any preset 1–10.")
-        ErrorLog.Text = "Error Log: Sewer Access object not found."
-    end
-end)
-
 createButton("Remove Backyard Door", function()
     local door = workspace:FindFirstChild("KeyCard Door")
 
@@ -852,7 +828,19 @@ createButton("TP to Chests", function()
     LocalPlayer.Character:PivotTo(CFrame.new(-335, -12, 22))
 end)
 
+createButton("Door Escape", function()
+    LocalPlayer.Character:PivotTo(CFrame.new(-95.9118805, 60.7662735, 33.5642052, 1, 0, 0, 0, 1, 0, 0, 0, 1))
+end)
+
+createButton("Secret Ending", function()
+    LocalPlayer.Character:PivotTo(CFrame.new(-95.6062012, 61.652523, 2.22535038, 1, 0, 0, 0, 1, 0, 0, 0, 1))
+end)
+
+createButton("Car Escape", function()
+    LocalPlayer.Character:PivotTo(CFrame.new(-96.0078888, 57.293026, -32.4911461, 1, 0, 0, 0, 1, 0, 0, 0, 1))
+end)
+
 createButton("Sewer Escape", function()
-    LocalPlayer.Character:PivotTo(CFrame.new(-340, -18, 34))
+    LocalPlayer.Character:PivotTo(CFrame.new(-342.852325, -17.6675205, 34.5113792, 1, 0, 0, 0, 1, 0, 0, 0, 1))
 end)
 
